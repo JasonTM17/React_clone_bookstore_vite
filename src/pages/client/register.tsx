@@ -8,8 +8,9 @@ function RegisterPage() {
   const handleSubmit = async (values: RegisterPayload & { confirmPassword: string }) => {
     try {
       await register({
-        name: values.name,
+        fullName: values.fullName,
         email: values.email,
+        phone: values.phone,
         password: values.password,
       })
       message.success('Tạo tài khoản thành công')
@@ -26,7 +27,7 @@ function RegisterPage() {
           Đăng ký tài khoản
         </Typography.Title>
         <Form form={form} layout="vertical" requiredMark={false} autoComplete="off" onFinish={handleSubmit}>
-          <Form.Item label="Họ tên" name="name" rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}>
+          <Form.Item label="Họ tên" name="fullName" rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}>
             <Input placeholder="Nguyen Van A" />
           </Form.Item>
 
@@ -39,6 +40,17 @@ function RegisterPage() {
             ]}
           >
             <Input placeholder="you@example.com" />
+          </Form.Item>
+
+          <Form.Item
+            label="Số điện thoại"
+            name="phone"
+            rules={[
+              { required: true, message: 'Vui lòng nhập số điện thoại' },
+              { min: 9, message: 'Số điện thoại không hợp lệ' },
+            ]}
+          >
+            <Input placeholder="0912345678" />
           </Form.Item>
 
           <Form.Item label="Mật khẩu" name="password" rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }, { min: 6, message: 'Mật khẩu tối thiểu 6 ký tự' }]}>

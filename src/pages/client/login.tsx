@@ -1,15 +1,20 @@
 import { Button, Card, Checkbox, Form, Input, Typography, message } from 'antd'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { login, type LoginPayload } from '../../services/auth.service'
+import { getAuthUser, isAdminUser } from '../../services/auth-storage'
 
 function LoginPage() {
   const [form] = Form.useForm<LoginPayload>()
+  const navigate = useNavigate()
 
   const handleSubmit = async (values: LoginPayload) => {
     try {
       await login(values)
       message.success('Đăng nhập thành công')
       form.resetFields()
+
+      const user = getAuthUser()
+      navigate(isAdminUser(user) ? '/admin' : '/')
     } catch {
       message.error('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.')
     }
@@ -23,14 +28,13 @@ function LoginPage() {
         </Typography.Title>
         <Form form={form} layout="vertical" requiredMark={false} autoComplete="off" onFinish={handleSubmit}>
           <Form.Item
-            label="Email"
-            name="email"
+            label="Email hoặc số điện thoại"
+            name="username"
             rules={[
-              { required: true, message: 'Vui lòng nhập email' },
-              { type: 'email', message: 'Email không hợp lệ' },
+              { required: true, message: 'Vui lòng nhập email hoặc số điện thoại' },
             ]}
           >
-            <Input placeholder="you@example.com" />
+            <Input placeholder="you@example.com / 0912345678" />
           </Form.Item>
 
           <Form.Item label="Mật khẩu" name="password" rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}>
