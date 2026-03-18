@@ -2,10 +2,26 @@ import { books, formatVnd } from '../../data/books'
 import CsvImportPanel from '../../components/admin/csv.import.panel'
 
 function AdminBooksPage() {
+  const exportRows = books.map((book) => ({
+    title: book.title,
+    author: book.author,
+    category: book.category,
+    price: String(book.price),
+    quantity: String(book.stock),
+    sold: '0',
+    thumbnail: book.image,
+  }))
+
   return (
     <section>
       <h2>Quản lý sách</h2>
-      <CsvImportPanel title="Nhập danh sách sách từ CSV" entityLabel="sách" moduleKey="books" />
+      <CsvImportPanel
+        title="Nhập / xuất danh sách sách CSV"
+        entityLabel="sách"
+        moduleKey="books"
+        exportRows={exportRows}
+        exportFileName="books-export.csv"
+      />
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>

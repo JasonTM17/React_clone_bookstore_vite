@@ -2,16 +2,53 @@ import { useMemo, useState } from 'react'
 import { Alert, Button, Card, Table, Typography, Upload, message } from 'antd'
 import type { UploadProps } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { parseCsvText, type ParsedCsvResult } from '../../services/csv.service'
+import { convertRowsToCsvText, downloadCsvFile, parseCsvText, type ParsedCsvResult } from '../../services/csv.service'
 import { importModuleRows, type AdminImportModule, type ImportResult } from '../../services/admin-import.service'
 
 type CsvImportPanelProps = {
   title: string
   entityLabel: string
   moduleKey: AdminImportModule
+  exportRows?: Record<string, unknown>[]
+  exportFileName?: string
 }
 
-function CsvImportPanel({ title, entityLabel, moduleKey }: CsvImportPanelProps) {
+const moduleTemplateRows: Record<AdminImportModule, Record<string, string>[]> = {
+  books: [
+    {
+      title: 'Clean Code',
+      author: 'Robert C. Martin',
+      category: 'Programming',
+      price: '299000',
+      quantity: '12',
+      sold: '0',
+      thumbnail: 'https://example.com/book.jpg',
+    },
+  ],
+  orders: [
+    {
+      name: 'Nguyen Van A',
+      address: '1 Nguyen Trai, Ha Noi',
+      phone: '0912345678',
+      totalPrice: '498000',
+      type: 'COD',
+    },
+  ],
+  users: [
+    {
+      fullName: 'Tran Thi B',
+      email: 'tranthib@example.com',
+      password: '123456',
+      phone: '0987654321',
+      role: 'USER',
+      age: '24',
+      gender: 'FEMALE',
+      address: 'Da Nang',
+    },
+  ],
+}
+
+function CsvImportPanel({ title, entityLabel, moduleKey, exportRows = [], exportFileName }: CsvImportPanelProps) {
   const [result, setResult] = useState<ParsedCsvResult | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
@@ -86,6 +123,31 @@ function CsvImportPanel({ title, entityLabel, moduleKey }: CsvImportPanelProps) 
     }
   }
 
+  const handleExportTemplate = () => {
+    try {
+      const templateRows = moduleTemplateRows[moduleKey]
+      const csvText = convertRowsToCsvText(templateRows)
+
+      downloadCsvFile(`${moduleKey}-template.csv`, csvText)
+      message.success('Đã xuất file CSV mẫu')
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Xuất CSV mẫu thất bại'
+      message.error(errorMessage)
+    }
+  }
+
+  const handleExportCurrentData = () => {
+    try {
+      const csvText = convertRowsToCsvText(exportRows)
+
+      downloadCsvFile(exportFileName ?? `${moduleKey}-data.csv`, csvText)
+      message.success(`Đã xuất ${exportRows.length} ${entityLabel} ra CSV`)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Xuất CSV thất bại'
+      message.error(errorMessage)
+    }
+  }
+
   return (
     <Card style={{ marginBottom: 16 }}>
       <Typography.Title level={5} style={{ marginTop: 0 }}>
@@ -99,6 +161,10 @@ function CsvImportPanel({ title, entityLabel, moduleKey }: CsvImportPanelProps) 
       </Upload.Dragger>
 
       <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+        <Button onClick={handleExportTemplate}>Tải CSV mẫu</Button>
+        <Button onClick={handleExportCurrentData} disabled={exportRows.length === 0}>
+          Xuất dữ liệu hiện tại
+        </Button>
         <Button type="primary" onClick={handleUploadToServer} loading={isUploading} disabled={!result}>
           Upload lên server
         </Button>

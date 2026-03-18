@@ -75,3 +75,62 @@ export function parseCsvText(text: string): ParsedCsvResult {
     rows,
   };
 }
+
+function escapeCsvValue(value: unknown): string {
+  const stringValue = String(value ?? "");
+  const normalized = stringValue.replace(/"/g, '""');
+
+  if (
+    normalized.includes(",") ||
+    normalized.includes("\n") ||
+    normalized.includes("\r") ||
+    normalized.includes('"')
+  ) {
+    return `"${normalized}"`;
+  }
+
+  return normalized;
+}
+
+export function convertRowsToCsvText(
+  rows: Record<string, unknown>[],
+  preferredHeaders?: string[],
+): string {
+  if (
+    rows.length === 0 &&
+    (!preferredHeaders || preferredHeaders.length === 0)
+  ) {
+    throw new Error("Không có dữ liệu để xuất CSV");
+  }
+
+  const fallbackHeaders = rows.length > 0 ? Object.keys(rows[0]) : [];
+  const headers =
+    preferredHeaders && preferredHeaders.length > 0
+      ? preferredHeaders
+      : fallbackHeaders;
+
+  const headerLine = headers.map((header) => escapeCsvValue(header)).join(",");
+  const rowLines = rows.map((row) =>
+    headers.map((header) => escapeCsvValue(row[header])).join(","),
+  );
+
+  return [headerLine, ...rowLines].join("\n");
+}
+
+export function downloadCsvFile(fileName: string, csvText: string) {
+  const blob = new Blob([`\uFEFF${csvText}`], {
+    type: "text/csv;charset=utf-8;",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = fileName.endsWith(".csv") ? fileName : `${fileName}.csv`;
+  link.style.display = "none";
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+}
