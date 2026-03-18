@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import './styles/global.scss'
 import AdminLayout from './components/admin/admin.layout'
 import ClientLayout from './components/layout/client.layout'
 import AdminBooksPage from './pages/admin/books'
@@ -15,6 +16,8 @@ import HomePage from './pages/client/home'
 import LoginPage from './pages/client/login'
 import NotFoundPage from './pages/client/not-found'
 import RegisterPage from './pages/client/register'
+import AuthLoginPage from './pages/client/auth/login'
+import AuthRegisterPage from './pages/client/auth/register'
 
 const router = createBrowserRouter([
   {
@@ -46,8 +49,16 @@ const router = createBrowserRouter([
         element: <LoginPage />,
       },
       {
+        path: '/auth/login',
+        element: <AuthLoginPage />,
+      },
+      {
         path: '/register',
         element: <RegisterPage />,
+      },
+      {
+        path: '/auth/register',
+        element: <AuthRegisterPage />,
       },
       {
         path: '*',

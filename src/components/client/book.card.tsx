@@ -1,12 +1,17 @@
 import { Link } from 'react-router-dom'
 import { formatVnd } from '../../data/books'
 import type { Book } from '../../types/book'
+import { addBookToCart } from '../../data/cart'
 
 type BookCardProps = {
   book: Book
 }
 
 function BookCard({ book }: BookCardProps) {
+  const handleAddToCart = () => {
+    addBookToCart(book, 1)
+  }
+
   return (
     <article
       style={{
@@ -30,6 +35,13 @@ function BookCard({ book }: BookCardProps) {
       <Link to={`/book/${book.id}`} style={{ marginTop: 4, color: '#1d4ed8', textDecoration: 'none' }}>
         Xem chi tiết
       </Link>
+      <button
+        type="button"
+        onClick={handleAddToCart}
+        style={{ marginTop: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid #d1d5db', cursor: 'pointer' }}
+      >
+        Thêm vào giỏ
+      </button>
     </article>
   )
 }
