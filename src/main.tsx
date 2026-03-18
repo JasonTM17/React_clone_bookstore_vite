@@ -1,90 +1,97 @@
-import { StrictMode } from 'react'
+/* eslint-disable react-refresh/only-export-components */
+import { lazy, StrictMode, Suspense, type ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import 'antd/dist/reset.css'
 import './styles/global.scss'
-import AdminLayout from './components/admin/admin.layout'
-import ClientLayout from './components/layout/client.layout'
-import AdminBooksPage from './pages/admin/books'
-import AdminDashboardPage from './pages/admin/dashboard'
-import AdminOrdersPage from './pages/admin/orders'
-import AdminUsersPage from './pages/admin/users'
-import AboutPage from './pages/client/about'
-import BookDetailPage from './pages/client/book.detail'
-import BookPage from './pages/client/book'
-import CartPage from './pages/client/cart'
-import HomePage from './pages/client/home'
-import LoginPage from './pages/client/login'
-import NotFoundPage from './pages/client/not-found'
-import RegisterPage from './pages/client/register'
-import AuthLoginPage from './pages/client/auth/login'
-import AuthRegisterPage from './pages/client/auth/register'
+
+const AdminLayout = lazy(() => import('./components/admin/admin.layout'))
+const ClientLayout = lazy(() => import('./components/layout/client.layout'))
+const AdminBooksPage = lazy(() => import('./pages/admin/books'))
+const AdminDashboardPage = lazy(() => import('./pages/admin/dashboard'))
+const AdminOrdersPage = lazy(() => import('./pages/admin/orders'))
+const AdminUsersPage = lazy(() => import('./pages/admin/users'))
+const AboutPage = lazy(() => import('./pages/client/about'))
+const BookDetailPage = lazy(() => import('./pages/client/book.detail'))
+const BookPage = lazy(() => import('./pages/client/book'))
+const CartPage = lazy(() => import('./pages/client/cart'))
+const HomePage = lazy(() => import('./pages/client/home'))
+const LoginPage = lazy(() => import('./pages/client/login'))
+const NotFoundPage = lazy(() => import('./pages/client/not-found'))
+const RegisterPage = lazy(() => import('./pages/client/register'))
+const AuthLoginPage = lazy(() => import('./pages/client/auth/login'))
+const AuthRegisterPage = lazy(() => import('./pages/client/auth/register'))
+
+const withSuspense = (element: ReactNode) => (
+  <Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}>{element}</Suspense>
+)
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <ClientLayout />,
+    element: withSuspense(<ClientLayout />),
     children: [
       {
         index: true,
-        element: <HomePage />,
+        element: withSuspense(<HomePage />),
       },
       {
         path: '/book',
-        element: <BookPage />,
+        element: withSuspense(<BookPage />),
       },
       {
         path: '/book/:bookId',
-        element: <BookDetailPage />,
+        element: withSuspense(<BookDetailPage />),
       },
       {
         path: '/about',
-        element: <AboutPage />,
+        element: withSuspense(<AboutPage />),
       },
       {
         path: '/cart',
-        element: <CartPage />,
+        element: withSuspense(<CartPage />),
       },
       {
         path: '/login',
-        element: <LoginPage />,
+        element: withSuspense(<LoginPage />),
       },
       {
         path: '/auth/login',
-        element: <AuthLoginPage />,
+        element: withSuspense(<AuthLoginPage />),
       },
       {
         path: '/register',
-        element: <RegisterPage />,
+        element: withSuspense(<RegisterPage />),
       },
       {
         path: '/auth/register',
-        element: <AuthRegisterPage />,
+        element: withSuspense(<AuthRegisterPage />),
       },
       {
         path: '*',
-        element: <NotFoundPage />,
+        element: withSuspense(<NotFoundPage />),
       },
     ],
   },
   {
     path: '/admin',
-    element: <AdminLayout />,
+    element: withSuspense(<AdminLayout />),
     children: [
       {
         index: true,
-        element: <AdminDashboardPage />,
+        element: withSuspense(<AdminDashboardPage />),
       },
       {
         path: '/admin/books',
-        element: <AdminBooksPage />,
+        element: withSuspense(<AdminBooksPage />),
       },
       {
         path: '/admin/orders',
-        element: <AdminOrdersPage />,
+        element: withSuspense(<AdminOrdersPage />),
       },
       {
         path: '/admin/users',
-        element: <AdminUsersPage />,
+        element: withSuspense(<AdminUsersPage />),
       },
     ],
   },

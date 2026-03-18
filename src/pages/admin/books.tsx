@@ -1,9 +1,11 @@
 import { books, formatVnd } from '../../data/books'
+import CsvImportPanel from '../../components/admin/csv.import.panel'
 
 function AdminBooksPage() {
   return (
     <section>
       <h2>Quản lý sách</h2>
+      <CsvImportPanel title="Nhập danh sách sách từ CSV" entityLabel="sách" />
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
