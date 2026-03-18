@@ -11,6 +11,7 @@ type CsvImportPanelProps = {
   moduleKey: AdminImportModule
   exportRows?: Record<string, unknown>[]
   exportFileName?: string
+  onImportSuccess?: () => Promise<void> | void
 }
 
 const moduleTemplateRows: Record<AdminImportModule, Record<string, string>[]> = {
@@ -21,8 +22,9 @@ const moduleTemplateRows: Record<AdminImportModule, Record<string, string>[]> = 
       category: 'Programming',
       price: '299000',
       quantity: '12',
-      sold: '0',
       thumbnail: 'https://example.com/book.jpg',
+      slider: 'https://example.com/book.jpg|https://example.com/book-2.jpg',
+      mainText: 'Book description here',
     },
   ],
   orders: [
@@ -32,6 +34,9 @@ const moduleTemplateRows: Record<AdminImportModule, Record<string, string>[]> = 
       phone: '0912345678',
       totalPrice: '498000',
       type: 'COD',
+      bookId: '65d0f1023456789012345678',
+      bookName: 'Clean Code',
+      quantity: '1',
     },
   ],
   users: [
@@ -40,15 +45,18 @@ const moduleTemplateRows: Record<AdminImportModule, Record<string, string>[]> = 
       email: 'tranthib@example.com',
       password: '123456',
       phone: '0987654321',
-      role: 'USER',
-      age: '24',
-      gender: 'FEMALE',
-      address: 'Da Nang',
     },
   ],
 }
 
-function CsvImportPanel({ title, entityLabel, moduleKey, exportRows = [], exportFileName }: CsvImportPanelProps) {
+function CsvImportPanel({
+  title,
+  entityLabel,
+  moduleKey,
+  exportRows = [],
+  exportFileName,
+  onImportSuccess,
+}: CsvImportPanelProps) {
   const [result, setResult] = useState<ParsedCsvResult | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
@@ -113,6 +121,7 @@ function CsvImportPanel({ title, entityLabel, moduleKey, exportRows = [], export
 
       if (response.failed === 0) {
         message.success(`Đã import ${response.success}/${response.total} ${entityLabel} lên hệ thống`)
+        await onImportSuccess?.()
       } else {
         message.warning(`Import xong: ${response.success} thành công, ${response.failed} thất bại`)
       }
