@@ -1,5 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { useState } from 'react'
+import { Button, Card, InputNumber, Rate, Space, Tag, Typography, message } from 'antd'
+import { ShoppingCartOutlined } from '@ant-design/icons'
 import { books, formatVnd } from '../../data/books'
 import { addBookToCart } from '../../data/cart'
 
@@ -11,67 +13,78 @@ function BookDetailPage() {
   if (!book) {
     return (
       <section>
-        <h1>Không tìm thấy sách</h1>
-        <Link to="/book" style={{ color: '#1d4ed8', textDecoration: 'none' }}>
-          Quay lại danh sách sách
-        </Link>
+        <Card>
+          <Typography.Title level={3}>Không tìm thấy sách</Typography.Title>
+          <Link to="/book" style={{ textDecoration: 'none' }}>
+            <Button type="primary">Quay lại danh sách sách</Button>
+          </Link>
+        </Card>
       </section>
     )
   }
 
+  const handleAddToCart = () => {
+    addBookToCart(book, quantity)
+    message.success(`Đã thêm ${quantity} cuốn "${book.title}" vào giỏ`)
+  }
+
   return (
-    <section style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 20 }}>
-      <img src={book.image} alt={book.title} style={{ width: '100%', borderRadius: 12 }} />
-      <div>
-        <h1 style={{ marginTop: 0 }}>{book.title}</h1>
-        <p style={{ color: '#4b5563' }}>Tác giả: {book.author}</p>
-        <p style={{ color: '#4b5563' }}>Thể loại: {book.category}</p>
-        <p style={{ fontWeight: 700, fontSize: 20 }}>{formatVnd(book.price)}</p>
-        <p style={{ color: '#4b5563' }}>Đánh giá: {book.rating} / 5</p>
-        <p style={{ color: '#4b5563' }}>Tồn kho: {book.stock}</p>
-        <p>{book.description}</p>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 8 }}>
-          <label htmlFor="quantity">Số lượng</label>
-          <input
-            id="quantity"
-            type="number"
-            min={1}
-            max={book.stock}
-            value={quantity}
-            onChange={(event) => {
-              const value = Number(event.target.value)
-              if (Number.isNaN(value)) {
-                return
-              }
+    <section style={{ display: 'grid', gridTemplateColumns: 'minmax(260px, 360px) 1fr', gap: 20 }}>
+      <Card bodyStyle={{ padding: 10 }}>
+        <img src={book.image} alt={book.title} style={{ width: '100%', borderRadius: 10 }} />
+      </Card>
 
-              if (value < 1) {
-                setQuantity(1)
-                return
-              }
+      <Card>
+        <Space direction="vertical" size={10} style={{ width: '100%' }}>
+          <Space>
+            <Tag color="blue">{book.category}</Tag>
+            <Tag color={book.stock > 10 ? 'success' : 'warning'}>Tồn kho: {book.stock}</Tag>
+          </Space>
 
-              if (value > book.stock) {
-                setQuantity(book.stock)
-                return
-              }
+          <Typography.Title level={2} style={{ margin: 0 }}>
+            {book.title}
+          </Typography.Title>
+          <Typography.Text type="secondary">Tác giả: {book.author}</Typography.Text>
 
-              setQuantity(value)
-            }}
-            style={{ width: 80, padding: 8, borderRadius: 8, border: '1px solid #d1d5db' }}
-          />
-        </div>
-        <div style={{ display: 'flex', gap: 12, marginTop: 12, alignItems: 'center' }}>
-          <button
-            type="button"
-            onClick={() => addBookToCart(book, quantity)}
-            style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', cursor: 'pointer' }}
-          >
-            Thêm vào giỏ hàng
-          </button>
-          <Link to="/cart" style={{ color: '#1d4ed8', textDecoration: 'none', fontWeight: 600 }}>
-            Đi đến giỏ hàng
-          </Link>
-        </div>
-      </div>
+          <Space align="center">
+            <Rate allowHalf disabled value={book.rating} />
+            <Typography.Text>{book.rating.toFixed(1)} / 5</Typography.Text>
+          </Space>
+
+          <Typography.Title level={3} style={{ margin: 0, color: '#1677ff' }}>
+            {formatVnd(book.price)}
+          </Typography.Title>
+
+          <Typography.Paragraph style={{ marginBottom: 6 }}>{book.description}</Typography.Paragraph>
+
+          <Space align="center" wrap>
+            <Typography.Text strong>Số lượng</Typography.Text>
+            <InputNumber
+              min={1}
+              max={book.stock}
+              value={quantity}
+              onChange={(value) => {
+                const numeric = Number(value)
+
+                if (Number.isNaN(numeric)) {
+                  return
+                }
+
+                setQuantity(Math.min(Math.max(numeric, 1), book.stock))
+              }}
+            />
+          </Space>
+
+          <Space wrap>
+            <Button type="primary" icon={<ShoppingCartOutlined />} size="large" onClick={handleAddToCart}>
+              Thêm vào giỏ hàng
+            </Button>
+            <Link to="/cart" style={{ textDecoration: 'none' }}>
+              <Button size="large">Đi đến giỏ hàng</Button>
+            </Link>
+          </Space>
+        </Space>
+      </Card>
     </section>
   )
 }

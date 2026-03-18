@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import { Card, Empty, Input, Select, Space, Typography } from 'antd'
+import { SearchOutlined } from '@ant-design/icons'
 import BookCard from '../../components/client/book.card'
 import { books } from '../../data/books'
 
@@ -42,38 +44,58 @@ function BookPage() {
 
   return (
     <section>
-      <h1>Danh sách sách</h1>
-      <p style={{ color: '#4b5563' }}>Hiển thị: {filteredBooks.length} / {books.length} đầu sách</p>
-      <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginBottom: 14 }}>
-        <input
-          value={keyword}
-          onChange={(event) => setKeyword(event.target.value)}
-          placeholder="Tìm theo tên sách hoặc tác giả"
-          style={{ padding: 10, borderRadius: 8, border: '1px solid #d1d5db' }}
-        />
-        <select
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
-          style={{ padding: 10, borderRadius: 8, border: '1px solid #d1d5db' }}
-        >
-          {categories.map((item) => (
-            <option key={item} value={item}>
-              {item === 'all' ? 'Tất cả thể loại' : item}
-            </option>
+      <Typography.Title level={2} style={{ marginBottom: 6 }}>
+        Khám phá kho sách
+      </Typography.Title>
+      <Typography.Paragraph type="secondary" style={{ marginBottom: 16 }}>
+        Hiển thị {filteredBooks.length} / {books.length} đầu sách phù hợp.
+      </Typography.Paragraph>
+
+      <Card style={{ marginBottom: 18 }} bodyStyle={{ padding: 14 }}>
+        <Space wrap size={12} style={{ width: '100%' }}>
+          <Input
+            allowClear
+            prefix={<SearchOutlined />}
+            style={{ minWidth: 260, flex: 1 }}
+            size="large"
+            placeholder="Tìm theo tên sách hoặc tác giả"
+            value={keyword}
+            onChange={(event) => setKeyword(event.target.value)}
+          />
+          <Select
+            size="large"
+            value={category}
+            style={{ minWidth: 200 }}
+            onChange={(value) => setCategory(value)}
+            options={categories.map((item) => ({
+              value: item,
+              label: item === 'all' ? 'Tất cả thể loại' : item,
+            }))}
+          />
+          <Select
+            size="large"
+            value={sort}
+            style={{ minWidth: 200 }}
+            onChange={(value) => setSort(value)}
+            options={[
+              { value: 'popular', label: 'Ưu tiên tồn kho' },
+              { value: 'rating', label: 'Đánh giá cao' },
+              { value: 'price-asc', label: 'Giá tăng dần' },
+              { value: 'price-desc', label: 'Giá giảm dần' },
+            ]}
+          />
+        </Space>
+      </Card>
+
+      {filteredBooks.length === 0 ? (
+        <Empty description="Không tìm thấy đầu sách phù hợp" />
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 14 }}>
+          {filteredBooks.map((book) => (
+            <BookCard key={book.id} book={book} />
           ))}
-        </select>
-        <select value={sort} onChange={(event) => setSort(event.target.value)} style={{ padding: 10, borderRadius: 8, border: '1px solid #d1d5db' }}>
-          <option value="popular">Ưu tiên tồn kho</option>
-          <option value="rating">Đánh giá cao</option>
-          <option value="price-asc">Giá tăng dần</option>
-          <option value="price-desc">Giá giảm dần</option>
-        </select>
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-        {filteredBooks.map((book) => (
-          <BookCard key={book.id} book={book} />
-        ))}
-      </div>
+        </div>
+      )}
     </section>
   )
 }

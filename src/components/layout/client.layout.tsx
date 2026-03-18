@@ -4,9 +4,9 @@ import AppHeader from './app.header'
 
 function ClientLayout() {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f5f7fb' }}>
       <AppHeader />
-      <main style={{ width: 'min(1120px, 92%)', margin: '24px auto', flex: 1 }}>
+      <main className="client-main" style={{ width: 'min(1160px, 92%)', margin: '24px auto', flex: 1 }}>
         <Outlet />
       </main>
       <AppFooter />
