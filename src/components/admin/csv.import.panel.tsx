@@ -1,16 +1,20 @@
 import { useMemo, useState } from 'react'
-import { Alert, Card, Table, Typography, Upload, message } from 'antd'
+import { Alert, Button, Card, Table, Typography, Upload, message } from 'antd'
 import type { UploadProps } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { parseCsvText, type ParsedCsvResult } from '../../services/csv.service'
+import { importModuleRows, type AdminImportModule, type ImportResult } from '../../services/admin-import.service'
 
 type CsvImportPanelProps = {
   title: string
   entityLabel: string
+  moduleKey: AdminImportModule
 }
 
-function CsvImportPanel({ title, entityLabel }: CsvImportPanelProps) {
+function CsvImportPanel({ title, entityLabel, moduleKey }: CsvImportPanelProps) {
   const [result, setResult] = useState<ParsedCsvResult | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [importResult, setImportResult] = useState<ImportResult | null>(null)
 
   const columns = useMemo<ColumnsType<Record<string, string>>>(() => {
     if (!result) {
@@ -47,14 +51,39 @@ function CsvImportPanel({ title, entityLabel }: CsvImportPanelProps) {
         const parsed = parseCsvText(text)
 
         setResult(parsed)
+        setImportResult(null)
         message.success(`Đã nhận ${parsed.rows.length} ${entityLabel} từ CSV`)
       } catch (error) {
+        setResult(null)
+        setImportResult(null)
         const errorMessage = error instanceof Error ? error.message : 'Không thể đọc file CSV'
         message.error(errorMessage)
       }
 
       return false
     },
+  }
+
+  const handleUploadToServer = async () => {
+    if (!result) {
+      return
+    }
+
+    try {
+      setIsUploading(true)
+      const response = await importModuleRows(moduleKey, result.rows)
+      setImportResult(response)
+
+      if (response.failed === 0) {
+        message.success(`Đã import ${response.success}/${response.total} ${entityLabel} lên hệ thống`)
+      } else {
+        message.warning(`Import xong: ${response.success} thành công, ${response.failed} thất bại`)
+      }
+    } catch {
+      message.error('Upload CSV thất bại. Vui lòng kiểm tra API backend.')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   return (
@@ -68,6 +97,12 @@ function CsvImportPanel({ title, entityLabel }: CsvImportPanelProps) {
         <br />
         <Typography.Text type="secondary">Hỗ trợ định dạng: .csv</Typography.Text>
       </Upload.Dragger>
+
+      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+        <Button type="primary" onClick={handleUploadToServer} loading={isUploading} disabled={!result}>
+          Upload lên server
+        </Button>
+      </div>
 
       {result && (
         <>
@@ -86,6 +121,20 @@ function CsvImportPanel({ title, entityLabel }: CsvImportPanelProps) {
             pagination={{ pageSize: 5 }}
             scroll={{ x: true }}
           />
+
+          {importResult && (
+            <Alert
+              style={{ marginTop: 12 }}
+              type={importResult.failed === 0 ? 'success' : 'warning'}
+              message={`Kết quả import: ${importResult.success}/${importResult.total} thành công`}
+              description={
+                importResult.errors.length > 0
+                  ? importResult.errors.slice(0, 5).join(' | ')
+                  : 'Không có lỗi import'
+              }
+              showIcon
+            />
+          )}
         </>
       )}
     </Card>
